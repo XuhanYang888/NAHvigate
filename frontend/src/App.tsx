@@ -34,12 +34,16 @@ function MapClickHandler({
 }
 
 function App() {
-  const [boundary, setBoundary] = useState<any>(null);
   const [startPoint, setStartPoint] = useState<[number, number] | null>(null);
   const [endPoint, setEndPoint] = useState<[number, number] | null>(null);
   const [normalRoute, setNormalRoute] = useState<[number, number][]>([]);
   const [nahRoute, setNahRoute] = useState<[number, number][]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [boundary, setBoundary] = useState<any>(null);
+
+  const [chaos, setChaos] = useState(50);
+  const [avoidHighways, setAvoidHighways] = useState(0);
+  const [loveRoundabouts, setLoveRoundabouts] = useState(0);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/boundary")
@@ -78,6 +82,9 @@ function App() {
           start_lon: startPoint[1],
           end_lat: endPoint[0],
           end_lon: endPoint[1],
+          chaos: chaos,
+          avoid_highways: avoidHighways,
+          love_roundabouts: loveRoundabouts,
         }),
       });
       const data = await response.json();
@@ -120,6 +127,61 @@ function App() {
                 ? `${endPoint[0].toFixed(4)}, ${endPoint[1].toFixed(4)}`
                 : "Click map to set"}
             </p>
+          </div>
+        </div>
+
+        <div className="space-y-6 mb-8 bg-gray-800 p-4 rounded-lg border border-gray-700">
+          <div>
+            <div className="flex justify-between mb-1">
+              <label className="text-xs text-gray-400 uppercase font-bold">
+                Pure Chaos
+              </label>
+              <span className="text-xs text-red-400">{chaos}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={chaos}
+              onChange={(e) => setChaos(Number(e.target.value))}
+              className="w-full accent-red-500"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between mb-1">
+              <label className="text-xs text-gray-400 uppercase font-bold">
+                Highway Hater
+              </label>
+              <span className="text-xs text-yellow-400">{avoidHighways}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={avoidHighways}
+              onChange={(e) => setAvoidHighways(Number(e.target.value))}
+              className="w-full accent-yellow-500"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between mb-1">
+              <label className="text-xs text-gray-400 uppercase font-bold">
+                Roundabout Enjoyer
+              </label>
+              <span className="text-xs text-purple-400">
+                {loveRoundabouts}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={loveRoundabouts}
+              onChange={(e) => setLoveRoundabouts(Number(e.target.value))}
+              className="w-full accent-purple-500"
+            />
           </div>
         </div>
 

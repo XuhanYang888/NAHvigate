@@ -24,6 +24,9 @@ class RouteRequest(BaseModel):
     start_lon: float
     end_lat: float
     end_lon: float
+    chaos: int = 0
+    avoid_highways: int = 0
+    love_roundabouts: int = 0
 
 
 @app.get("/api/boundary")
@@ -36,7 +39,7 @@ def get_boundary_endpoint():
 
 @app.post("/api/route")
 def calculate_route(req: RouteRequest):
-    routes = get_routes(req.start_lat, req.start_lon, req.end_lat, req.end_lon)
+    routes = get_routes(req)
     return {
         "status": "success" if routes["normal"] else "failed",
         "normal_route": routes["normal"],
