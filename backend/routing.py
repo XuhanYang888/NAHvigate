@@ -1,6 +1,8 @@
 import os
+import random
 import osmnx as ox
 import networkx as nx
+import json
 
 GRAPH_FILENAME = "toronto.graphml"
 PLACE_NAME = "Toronto, Ontario, Canada"
@@ -19,10 +21,22 @@ def load_graph():
         G = ox.graph_from_place(PLACE_NAME, network_type="drive")
         ox.save_graphml(G, GRAPH_FILENAME)
         print("Graph downloaded and saved!")
+
+    # chaotic weights js for testing
+    for u, v, k, data in G.edges(keys=True, data=True):
+        physical_length = data.get('length', 1.0)
+        data['chaos_weight'] = physical_length * random.uniform(1.0, 20.0)
+
     return G
 
 
-def get_shortest_path(start_lat, start_lon, end_lat, end_lon):
+def get_boundary():
+    gdf = ox.geocode_to_gdf(PLACE_NAME)
+    geojson_data = json.loads(gdf.to_json())
+    return geojson_data
+
+
+def get_routes(start_lat, start_lon, end_lat, end_lon):
     global G
     if G is None:
         load_graph()
@@ -30,16 +44,19 @@ def get_shortest_path(start_lat, start_lon, end_lat, end_lon):
     orig_node = ox.distance.nearest_nodes(G, X=start_lon, Y=start_lat)
     dest_node = ox.distance.nearest_nodes(G, X=end_lon, Y=end_lat)
 
+    routes = {"normal": [], "nah": []}
+
     try:
-        route_nodes = nx.shortest_path(
+        normal_nodes = nx.shortest_path(
             G, orig_node, dest_node, weight="length")
+        routes["normal"] = [[G.nodes[n]['y'], G.nodes[n]['x']]
+                            for n in normal_nodes]
+
+        nah_nodes = nx.shortest_path(
+            G, orig_node, dest_node, weight="chaos_weight")
+        routes["nah"] = [[G.nodes[n]['y'], G.nodes[n]['x']] for n in nah_nodes]
+
     except nx.NetworkXNoPath:
-        return []
+        pass
 
-    route_coords = []
-    for node in route_nodes:
-        lat = G.nodes[node]['y']
-        lon = G.nodes[node]['x']
-        route_coords.append([lat, lon])
-
-    return route_coords
+    return routes

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from routing import load_graph, get_shortest_path
+from routing import load_graph, get_routes, get_boundary
 
 app = FastAPI(title="NAHvigate API")
 
@@ -26,14 +26,22 @@ class RouteRequest(BaseModel):
     end_lon: float
 
 
+@app.get("/api/boundary")
+def get_boundary_endpoint():
+    try:
+        return get_boundary()
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.post("/api/route")
 def calculate_route(req: RouteRequest):
-    coords = get_shortest_path(
-        req.start_lat, req.start_lon, req.end_lat, req.end_lon)
+    routes = get_routes(req.start_lat, req.start_lon, req.end_lat, req.end_lon)
     return {
-        "status": "success" if coords else "failed",
-        "route": coords,
-        "message": "Calculated the most boring route possible."
+        "status": "success" if routes["normal"] else "failed",
+        "normal_route": routes["normal"],
+        "nah_route": routes["nah"],
+        "message": "Successfully calculated one good route and one awful one."
     }
 
 
