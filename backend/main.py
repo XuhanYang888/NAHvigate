@@ -26,7 +26,7 @@ class RouteRequest(BaseModel):
     end_lon: float
     chaos: int = 0
     avoid_highways: int = 0
-    love_roundabouts: int = 0
+    love_bridges: int = 0
 
 
 @app.get("/api/boundary")
@@ -44,7 +44,9 @@ def calculate_route(req: RouteRequest):
         "status": "success" if routes["normal"] else "failed",
         "normal_route": routes["normal"],
         "nah_route": routes["nah"],
-        "message": "Successfully calculated one good route and one awful one."
+        "normal_stats": routes.get("normal_stats"),
+        "nah_stats": routes.get("nah_stats"),
+        "message": "Calculated."
     }
 
 

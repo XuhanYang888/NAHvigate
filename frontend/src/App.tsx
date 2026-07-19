@@ -43,7 +43,10 @@ function App() {
 
   const [chaos, setChaos] = useState(50);
   const [avoidHighways, setAvoidHighways] = useState(0);
-  const [loveRoundabouts, setLoveRoundabouts] = useState(0);
+  const [loveBridges, setLoveBridges] = useState(0);
+
+  const [normalStats, setNormalStats] = useState<any>(null);
+  const [nahStats, setNahStats] = useState<any>(null);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/boundary")
@@ -84,12 +87,14 @@ function App() {
           end_lon: endPoint[1],
           chaos: chaos,
           avoid_highways: avoidHighways,
-          love_roundabouts: loveRoundabouts,
+          love_bridges: loveBridges,
         }),
       });
       const data = await response.json();
       setNormalRoute(data.normal_route);
       setNahRoute(data.nah_route);
+      setNormalStats(data.normal_stats);
+      setNahStats(data.nah_stats);
     } catch (error) {
       console.error("Failed to fetch route:", error);
     } finally {
@@ -168,19 +173,17 @@ function App() {
           <div>
             <div className="flex justify-between mb-1">
               <label className="text-xs text-gray-400 uppercase font-bold">
-                Roundabout Enjoyer
+                Bridge Collector
               </label>
-              <span className="text-xs text-purple-400">
-                {loveRoundabouts}%
-              </span>
+              <span className="text-xs text-cyan-400">{loveBridges}%</span>
             </div>
             <input
               type="range"
               min="0"
               max="100"
-              value={loveRoundabouts}
-              onChange={(e) => setLoveRoundabouts(Number(e.target.value))}
-              className="w-full accent-purple-500"
+              value={loveBridges}
+              onChange={(e) => setLoveBridges(Number(e.target.value))}
+              className="w-full accent-cyan-500"
             />
           </div>
         </div>
@@ -192,6 +195,62 @@ function App() {
         >
           {isLoading ? "Avoiding common sense..." : "Generate NAH Route"}
         </button>
+
+        {nahStats && normalStats && (
+          <div className="mt-6 bg-gray-800 p-4 rounded-lg border border-red-900/50 shadow-lg">
+            <h3 className="text-red-400 font-bold uppercase tracking-wider text-sm mb-3 border-b border-gray-700 pb-2">
+              Damage Report
+            </h3>
+
+            <div className="space-y-3">
+              {/* NEW: Estimated Time */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm">Estimated Time</span>
+                <div className="text-right">
+                  <span className="text-white font-mono">
+                    {Math.floor(nahStats.time_mins / 60)}h{" "}
+                    {nahStats.time_mins % 60}m
+                  </span>
+                  <span className="text-xs text-red-400 ml-2 block">
+                    (+{nahStats.time_mins - normalStats.time_mins} mins)
+                  </span>
+                </div>
+              </div>
+
+              {/* Distance */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm">Distance</span>
+                <div className="text-right">
+                  <span className="text-white font-mono">
+                    {nahStats.distance_km} km
+                  </span>
+                  <span className="text-xs text-red-400 ml-2 block">
+                    (+
+                    {(nahStats.distance_km - normalStats.distance_km).toFixed(
+                      2,
+                    )}{" "}
+                    km)
+                  </span>
+                </div>
+              </div>
+
+              {/* Bridges */}
+              <div className="flex justify-between items-center">
+                <span className="text-cyan-400 text-sm font-bold">
+                  Bridges Crossed
+                </span>
+                <div className="text-right">
+                  <span className="text-cyan-400 font-mono font-bold">
+                    {nahStats.bridges}
+                  </span>
+                  <span className="text-xs text-gray-500 ml-2 block">
+                    (Normal: {normalStats.bridges})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {nahRoute.length > 0 && (
           <div className="mt-8 space-y-2">
