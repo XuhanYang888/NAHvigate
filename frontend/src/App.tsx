@@ -203,7 +203,6 @@ function App() {
             </h3>
 
             <div className="space-y-3">
-              {/* NEW: Estimated Time */}
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Estimated Time</span>
                 <div className="text-right">
@@ -217,7 +216,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Distance */}
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Distance</span>
                 <div className="text-right">
@@ -234,7 +232,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Bridges */}
               <div className="flex justify-between items-center">
                 <span className="text-cyan-400 text-sm font-bold">
                   Bridges Crossed
